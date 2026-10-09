@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventario con Arreglos</title>
+    <script src="js/Inventario.js"></script>
+    <script src="js/Producto.js"></script>
+</head>
+<body>
+    <!-- Todo nuestro proyecto debe estar dentro de un div-->
+    <div id="app">
+        <form> <!-- Metemos el método action para que puedan funcionar los botones-->
+            <!-- Usamos el for para asignar una parte de nuestra app-->
+            <!-- ========= SECCIÓN CAMPOS DE PRODUCTOS =========== -->
+            <fieldset id="AgregarProductos">
+                <legend>Agregar Productos</legend>
+                <label for="txtCodigo">       <!-- Usar el estandar [tipo] + nombre del campo -->
+                    Código: <input type="number" id="txtCodigo">
+                </label>
+                <br><br>
+                <label for="txtNombre">
+                   Nombre: <input type="text" id="txtNombre">
+                </label>
+                <br><br>
+                <label for="txtCantidad">
+                   Cantidad: <input type="number" id="txtCantidad">
+                </label>
+                <br><br>
+                <label for="txtCosto">
+                   Costo: <input type="number" id="txtCosto">
+                </label>
+                <br><br>
+
+                <!-- Botones de acción-->
+                <button type="button" id="btnAgregar">Agregar</button>
+                <button type="reset" id="btnCancelar">Cancelar</button>
+                <br><br>
+                <button type="button" id="btnAgregarPrimero">Agregar Primero</button>
+                <br><br>
+                <label for="btnAggPosicion">
+                    Agregar en posición: <input type="number" id="txtPosicion"> <button type="button" id="btnAggPosicion">Agregar</button>
+                </label>
+               <br>
+            </fieldset>
+            <br>
+
+            <fieldset>
+                <legend>Eliminar Productos</legend>
+                <label for="btnEliminar">
+                    Codigo del Producto a Eliminar: <input type="text" id="txtEliminar">
+                    <button type="button" id="btnEliminar">Eliminar</button>
+                </label>
+                <button type="button" id="btnExtPrimero">Extraer el primer Producto</button>
+             </fieldset>
+             <br>
+
+
+             <fieldset>
+                <legend>Productos Disponibles</legend>
+                <label for="btnBuscar">
+                    Código del Producto a Buscar: <input type="text" id="txtBuscar">
+                    <button type="button" id="btnBuscar">Buscar</button>
+                </label>
+                <button type="button" id="btnListar">Mostrar todos los Productos</button>
+                <button type="button" id="btnListarInv">Mostrar todos los Productos en Inverso</button>
+                <div id="divLista"><!--Acá se van a ver los productos--></div>
+             </fieldset>
+             <br>
+             
+        </form>
+    </div>
+
+    
+    <!-- Apartado para mostrar los Productos-->
+    
+    <form action="">
+        <fieldset>
+            <legend>Operaciones Realizadas</legend>
+            <div id="detalles"><!-- Acá se van a mostrar los Productos dinamicamente--></div>
+        </fieldset>
+
+    </form>
+        
+    <script> //Tener acceso a los valores
+
+        let miInventario = new Inventario();
+        let detalles=document.getElementById("detalles");
+        let listaProductos=document.getElementById("divLista");
+
+        // Caso de agregar un producto
+        const btnAgregar = document.getElementById("btnAgregar");
+        btnAgregar.addEventListener("click",()=>{
+
+            //Obtenemos los valores de los campos del producto
+            let codigo = document.getElementById("txtCodigo").value;
+            let nombre = document.getElementById("txtNombre").value;
+            let cantidad = document.getElementById("txtCantidad").value;
+            let costo = document.getElementById("txtCosto").value;
+
+            let nuevo = new Producto(codigo, nombre, cantidad, costo);
+            
+            let repetido = miInventario.agregar(nuevo);
+
+            if(!repetido){
+                detalles.innerHTML += 
+                "<p>Código: "+codigo+" Nombre: "+nombre+" Cantidad: "+cantidad+" Costo: "+costo+"</p>";
+
+                 // Limpiamos las cajas de texto
+                document.getElementById("txtCodigo").value = "";
+                document.getElementById("txtNombre").value = "";
+                document.getElementById("txtCantidad").value = "";
+                document.getElementById("txtCosto").value = "";
+            }else detalles.innerHTML += "<p>El código del producto ya existe</p>"
+            //Retornamos el valor dentro del detalles
+            
+        });
+
+
+        const btnAgregarPrimero = document.getElementById("btnAgregarPrimero");
+        btnAgregarPrimero.addEventListener("click", () => {
+
+            // Obtenemos los valores de los campos
+            let codigo = document.getElementById("txtCodigo").value;
+            let nombre = document.getElementById("txtNombre").value;
+            let cantidad = document.getElementById("txtCantidad").value;
+            let costo = document.getElementById("txtCosto").value;
+
+            // Creamos el producto
+            let nuevo = new Producto(codigo, nombre, cantidad, costo);
+
+            // Intentamos agregarlo al inicio
+            let agregado = miInventario.agregarInicio(nuevo);
+
+            if(agregado){
+
+                // Mostramos la lista actualizada
+                detalles.innerHTML = miInventario.listar();
+
+                // Limpiamos los campos
+                document.getElementById("txtCodigo").value = "";
+                document.getElementById("txtNombre").value = "";
+                document.getElementById("txtCantidad").value = "";
+                document.getElementById("txtCosto").value = "";
+
+            } else detalles.innerHTML += "<p>El código del producto ya existe</p>";
+
+        });
+
+        // Caso de eliminar un producto
+        const btnEliminar = document.getElementById("btnEliminar");
+        btnEliminar.addEventListener("click",()=>{
+
+            //Obtenemos el valor del código a eliminar
+            let codigo = document.getElementById("txtEliminar").value;
+
+            //Verificamos que el codigo exista
+            if(miInventario.eliminar(codigo)==true)
+                detalles.innerHTML += 
+                "<h3>Se elimino el producto con codigo "+codigo+"</h3>";
+            else
+                detalles.innerHTML +=
+                "<h3>No se encontró el Producto "+codigo+"</h3>";
+        });
+
+        // Caso de leer/mostrar los producto
+        const btnListar = document.getElementById("btnListar");
+        btnListar.addEventListener("click",()=>{
+            detalles.innerHTML = miInventario.listar();
+        });
+
+        // Caso de leer/mostrar los productos al inverso
+        const btnListarInv = document.getElementById("btnListarInv");
+        btnListarInv.addEventListener("click",()=>{
+            detalles.innerHTML = miInventario.listarInverso();
+        });
+
+        // Caso de buscar un producto por código
+        const btnBuscar = document.getElementById("btnBuscar");
+        btnBuscar.addEventListener("click",()=>{
+            // Obtenemos el código del producto a buscar
+            let codigo = document.getElementById("txtBuscar").value;
+
+            if(miInventario.buscar(codigo)!=null)
+                detalles.innerHTML = miInventario.buscar(codigo);
+            else
+                detalles.innerHTML = "<p>¡No se encontró un producto con este código!</p>";
+        });
+
+
+        // Caso de eliminar el primer producto agregado y mostrarlo
+        const btnExtPrimero = document.getElementById("btnExtPrimero");
+        btnExtPrimero.addEventListener("click", () => {
+
+            // Extraemos el primer producto
+            let extraido = miInventario.extraerPrimero();
+
+            // Verificamos si se extrajo un producto
+            if(extraido !== null) 
+                detalles.innerHTML = extraido.infoHTML(); // Mostramos el producto extraído
+            else detalles.innerHTML = "<p>El inventario está vacío.</p>";
+
+        });
+
+        const btnAggPosicion = document.getElementById("btnAggPosicion");
+        btnAggPosicion.addEventListener("click", () => {
+
+            // Obtenemos los datos del producto
+            let codigo = document.getElementById("txtCodigo").value;
+            let nombre = document.getElementById("txtNombre").value;
+            let cantidad = document.getElementById("txtCantidad").value;
+            let costo = document.getElementById("txtCosto").value;
+
+            // Obtenemos la posición
+            let posicion = document.getElementById("txtPosicion").value;
+            
+            // Creamos el producto
+            let nuevo = new Producto(codigo, nombre, cantidad, costo);
+            
+            // Verificamos que el código no esté repetido
+            let repetido = false;
+            let aux = miInventario.primero;
+
+            while(aux !== null){
+                if(aux.codigo == codigo){
+                    repetido = true;
+                    break;
+                }
+                aux = aux.sig;
+            }
+
+            if(repetido) detalles.innerHTML = "<p>El código del producto ya existe.</p>";
+            else if(miInventario.insertar(nuevo, posicion)){
+                // Actualizamos la lista mostrada
+                detalles.innerHTML = miInventario.listar();
+
+                // Limpiamos los campos
+                document.getElementById("txtCodigo").value = "";
+                document.getElementById("txtNombre").value = "";
+                document.getElementById("txtCantidad").value = "";
+                document.getElementById("txtCosto").value = "";
+                document.getElementById("txtPosicion").value = "";
+
+            } else detalles.innerHTML = "<p>La posición indicada no existe.</p>";
+        });
+    </script>
+</body>
+</html>
